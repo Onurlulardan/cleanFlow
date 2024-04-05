@@ -39,7 +39,7 @@ namespace cleanFlow.Controllers
             try
             {
                 await _personelRepository.CreatePersonel(createPersonelDto);
-                return Ok("Personel başarılı bir şekilde eklendi! ");
+                return Ok("Personel başarılı bir şekilde eklendi!");
             }
             catch (Exception ex)
             {
