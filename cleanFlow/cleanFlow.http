@@ -1,0 +1,6 @@
+@cleanFlow_HostAddress = http://localhost:5004
+
+GET {{cleanFlow_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
