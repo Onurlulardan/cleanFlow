@@ -8,6 +8,7 @@ using cleanFlow.Repositories.PersonelRepository;
 using cleanFlow.Repositories.LoginRepository;
 using cleanFlow.Repositories.WcRepository;
 using cleanFlow.Repositories.ShiftRepository;
+using cleanFlow.Repositories.LocaitonRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,7 @@ builder.Services.AddTransient<IPersonelRepository, PersonelRepository>();
 builder.Services.AddTransient<ILoginRepository, LoginRepository>();
 builder.Services.AddTransient<IWcRepository, WcRepository>();
 builder.Services.AddTransient<IShiftRepository, ShiftRepository>();
+builder.Services.AddTransient<ILocaitonRepository, LocaitonRepository>();
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -82,8 +84,11 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 
