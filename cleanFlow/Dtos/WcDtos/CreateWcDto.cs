@@ -2,7 +2,6 @@
 {
     public class CreateWcDto
     {
-        public int WCID { get; set; }
         public string SECTION { get; set; }
         public string WCTYPE { get; set; }
         public string MAHALCODE { get; set; }

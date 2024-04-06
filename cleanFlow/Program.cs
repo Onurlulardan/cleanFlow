@@ -1,11 +1,12 @@
 using cleanFlow.Model.DapperContext;
-using cleanFlow.Repositories.PersonelRepository;
-using cleanFlow.Repositories.LoginRepository;
 using cleanFlow.Settings;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using cleanFlow.Repositories.PersonelRepository;
+using cleanFlow.Repositories.LoginRepository;
+using cleanFlow.Repositories.WcRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,7 @@ builder.Services.AddTransient<Context>();
 builder.Services.AddControllers();
 builder.Services.AddTransient<IPersonelRepository, PersonelRepository>();
 builder.Services.AddTransient<ILoginRepository, LoginRepository>();
+builder.Services.AddTransient<IWcRepository, WcRepository>();
 
 
 builder.Services.AddEndpointsApiExplorer();
