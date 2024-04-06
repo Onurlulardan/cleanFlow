@@ -12,6 +12,7 @@ using cleanFlow.Repositories.LocaitonRepository;
 using cleanFlow.Repositories.RoleRepository;
 using cleanFlow.Repositories.AssignRepository;
 using cleanFlow.Repositories.AuditRepository;
+using cleanFlow.Repositories.WorkOrderRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,7 @@ builder.Services.AddTransient<ILocaitonRepository, LocaitonRepository>();
 builder.Services.AddTransient<IRoleRepository, RoleRepository>();
 builder.Services.AddTransient<IAssignRepository, AssignRepository>();
 builder.Services.AddTransient<IAuditRepository, AuditRepository>();
+builder.Services.AddTransient<IWorkOrderRepository, WorkOrderRepository>();
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -84,8 +86,9 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAnyOrigin",
-               builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+        builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
+
 
 var app = builder.Build();
 
@@ -97,6 +100,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAnyOrigin");
 
 app.UseAuthorization();
 

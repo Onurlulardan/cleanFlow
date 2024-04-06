@@ -11,5 +11,6 @@
         public string MAHALCODE { get; set; }
         public int LOCATIONID { get; set; }
         public string LOCATIONNAME { get; set; }
+        public string SECTION { get; set;}
     }
 }
