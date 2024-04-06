@@ -11,6 +11,7 @@ using cleanFlow.Repositories.ShiftRepository;
 using cleanFlow.Repositories.LocaitonRepository;
 using cleanFlow.Repositories.RoleRepository;
 using cleanFlow.Repositories.AssignRepository;
+using cleanFlow.Repositories.AuditRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,7 @@ builder.Services.AddTransient<IShiftRepository, ShiftRepository>();
 builder.Services.AddTransient<ILocaitonRepository, LocaitonRepository>();
 builder.Services.AddTransient<IRoleRepository, RoleRepository>();
 builder.Services.AddTransient<IAssignRepository, AssignRepository>();
+builder.Services.AddTransient<IAuditRepository, AuditRepository>();
 
 
 builder.Services.AddEndpointsApiExplorer();

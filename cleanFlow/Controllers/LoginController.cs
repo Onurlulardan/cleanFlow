@@ -34,7 +34,7 @@ namespace cleanFlow.Controllers
                     var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("Jwt:Secret"));
                     var tokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new System.Security.Claims.ClaimsIdentity(new Claim[]
+                        Subject = new ClaimsIdentity(new Claim[]
                         {
                             new Claim(ClaimTypes.Name, loginDto.USERNAME)
                         }),
