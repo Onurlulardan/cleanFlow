@@ -8,7 +8,6 @@ namespace cleanFlow.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class PersonelController : ControllerBase
     {
         private readonly IPersonelRepository _personelRepository;
@@ -48,11 +47,11 @@ namespace cleanFlow.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdatePersonel(UpdatePersonelDto updatePersonelDto)
+        public async Task<IActionResult> UpdatePersonel(int personelId, UpdatePersonelDto updatePersonelDto)
         {
             try
             {
-                _personelRepository.UpdatePersonel(updatePersonelDto);
+                _personelRepository.UpdatePersonel(personelId, updatePersonelDto);
                 return Ok("Personel Başarılı bir şekilde güncellendi!");
             }
             catch (Exception ex)

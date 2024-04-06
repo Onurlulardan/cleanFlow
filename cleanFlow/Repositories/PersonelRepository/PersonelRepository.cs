@@ -80,7 +80,7 @@ namespace cleanFlow.Repositories.PersonelRepository
             }
         }
 
-        public async void UpdatePersonel(UpdatePersonelDto updatePersonelDto)
+        public async void UpdatePersonel(int personelId, UpdatePersonelDto updatePersonelDto)
         {
             string query = "UPDATE PERSONELS SET NAME = @NAME, SURNAME = @SURNAME, SEX = @SEX, PASSWORD = @PASSWORD, USERNAME = @USERNAME, AGE = @AGE, ROLEID = @ROLEID WHERE PERSONELID = @PERSONELID";
 
@@ -92,7 +92,7 @@ namespace cleanFlow.Repositories.PersonelRepository
             parameters.Add("@USERNAME", updatePersonelDto.USERNAME);
             parameters.Add("@AGE", updatePersonelDto.AGE);
             parameters.Add("@ROLEID", updatePersonelDto.ROLEID);
-            parameters.Add("@PERSONELID", updatePersonelDto.PERSONELID);
+            parameters.Add("@PERSONELID", personelId);
 
             using (var connection = _context.CreateConnection())
             {

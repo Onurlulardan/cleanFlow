@@ -59,12 +59,12 @@ namespace cleanFlow.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateWc(UpdateWcDto updateWcDto)
+        [HttpPut("{wcid}")]
+        public async Task<IActionResult> UpdateWc(int wcid,UpdateWcDto updateWcDto)
         {
             try
             {
-                await _wcRepository.UpdateWc(updateWcDto);
+                await _wcRepository.UpdateWc(wcid ,updateWcDto);
                 return Ok("WC başarılı bir şekilde güncellendi!");
             }
             catch (Exception ex)
@@ -73,8 +73,8 @@ namespace cleanFlow.Controllers
             }
         }
 
-        [HttpDelete("{wcid}")]
-        public async Task<IActionResult> DeleteWc(int wcid)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteWc(int[] wcid)
         {
             try
             {

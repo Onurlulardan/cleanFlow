@@ -2,7 +2,6 @@
 {
     public class UpdatePersonelDto
     {
-        public int PERSONELID { get; set; }
         public string NAME { get; set; }
         public string SURNAME { get; set; }
         public bool SEX { get; set; }

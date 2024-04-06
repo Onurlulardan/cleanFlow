@@ -7,7 +7,7 @@ namespace cleanFlow.Repositories.PersonelRepository
         Task<List<ResultPersonelDto>> getAllPersonels();
         Task CreatePersonel(CreatePersonelDto createPersonelDto);
 
-        void UpdatePersonel(UpdatePersonelDto updatePersonelDto);
+        void UpdatePersonel(int personelId, UpdatePersonelDto updatePersonelDto);
 
         void DeletePersonel(int[] personelId);
 

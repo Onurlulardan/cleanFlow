@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using cleanFlow.Repositories.PersonelRepository;
 using cleanFlow.Repositories.LoginRepository;
 using cleanFlow.Repositories.WcRepository;
+using cleanFlow.Repositories.ShiftRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,7 @@ builder.Services.AddControllers();
 builder.Services.AddTransient<IPersonelRepository, PersonelRepository>();
 builder.Services.AddTransient<ILoginRepository, LoginRepository>();
 builder.Services.AddTransient<IWcRepository, WcRepository>();
+builder.Services.AddTransient<IShiftRepository, ShiftRepository>();
 
 
 builder.Services.AddEndpointsApiExplorer();

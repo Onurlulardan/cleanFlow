@@ -27,7 +27,7 @@ namespace cleanFlow.Repositories.WcRepository
             }
         }
 
-        public async Task DeleteWc(int wcid)
+        public async Task DeleteWc(int[] wcid)
         {
             string query = "DELETE FROM WC WHERE WCID = @WCID";
 
@@ -65,16 +65,17 @@ namespace cleanFlow.Repositories.WcRepository
             }
         }
 
-        public async Task UpdateWc(UpdateWcDto updateWcDto)
+        public async Task UpdateWc(int wcid, UpdateWcDto updateWcDto)
         {
-            string query = "UPDATE WC SET SECTION = @SECTION, WCTYPE = @WCTYPE, MAHALCODE = @MAHALCODE, LOCATIONID = @LOCATIONID WHERE WCID = @WCID";
+            string query = "UPDATE WC SET SECTION = @SECTION, WCTYPE = @WCTYPE, MAHALCODE = @MAHALCODE, LOCATIONID = @LOCATIONID, ASSIGNSTATUS = @ASSIGNSTATUS WHERE WCID = @WCID";
 
             var parameters = new DynamicParameters();
             parameters.Add("@SECTION", updateWcDto.SECTION);
             parameters.Add("@WCTYPE", updateWcDto.WCTYPE);
             parameters.Add("@MAHALCODE", updateWcDto.MAHALCODE);
             parameters.Add("@LOCATIONID", updateWcDto.LOCATIONID);
-            parameters.Add("@WCID", updateWcDto.WCID);
+            parameters.Add("@ASSIGNSTATUS", updateWcDto.ASSIGNSTATUS);
+            parameters.Add("@WCID", wcid);
 
             using (var connection = _context.CreateConnection())
             {
