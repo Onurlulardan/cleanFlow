@@ -3,7 +3,6 @@
     public class ResultWorkOrderImagesDto
     {
         public int WORKORDERID { get; set; }
-
         public int? ASSINGID { get; set; }
         public int? PERSONELID { get; set; }
         public int? SHIFTID { get; set; }

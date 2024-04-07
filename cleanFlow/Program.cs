@@ -41,7 +41,10 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 builder.Services.AddTransient<Context>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+});
 builder.Services.AddTransient<IPersonelRepository, PersonelRepository>();
 builder.Services.AddTransient<ILoginRepository, LoginRepository>();
 builder.Services.AddTransient<IWcRepository, WcRepository>();

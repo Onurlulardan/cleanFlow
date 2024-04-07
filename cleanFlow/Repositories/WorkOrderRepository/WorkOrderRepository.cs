@@ -26,20 +26,33 @@ namespace cleanFlow.Repositories.WorkOrderRepository
             }
         }
 
-        public async Task<List<ResultWorkOrderDto>> GetAllWorkOrders()
+        public async Task<(List<ResultWorkOrderDto> Data, int Total)> GetAllWorkOrders(int page, int limit)
         {
-            string query = "SELECT A.WORKORDERID, B.NAME, B.SURNAME, E.LOCATIONNAME, D.MAHALCODE, A.CREATED_AT, F.SHIFTSTARTDATE, F.SHIFTENDDATE FROM WORKORDER A LEFT JOIN PERSONELS B ON A.PERSONELID = B.PERSONELID LEFT JOIN ASSIGN C ON A.ASSIGNID = C.ASSIGNID LEFT JOIN WC D ON C.WCID = D.WCID LEFT JOIN LOCATIONS E ON D.LOCATIONID = E.LOCATIONID LEFT JOIN SHIFT F ON A.SHIFTID = F.SHIFTID";
+            int offset = page * limit;
+
+            string query = @$"SELECT A.WORKORDERID, B.NAME, B.SURNAME, E.LOCATIONNAME, D.MAHALCODE, A.CREATED_AT, F.SHIFTSTARTDATE, F.SHIFTENDDATE 
+                              FROM WORKORDER A 
+                              LEFT JOIN PERSONELS B ON A.PERSONELID = B.PERSONELID 
+                              LEFT JOIN ASSIGN C ON A.ASSIGNID = C.ASSIGNID 
+                              LEFT JOIN WC D ON C.WCID = D.WCID 
+                              LEFT JOIN LOCATIONS E ON D.LOCATIONID = E.LOCATIONID 
+                              LEFT JOIN SHIFT F ON A.SHIFTID = F.SHIFTID
+                              ORDER BY A.CREATED_AT DESC
+                              LIMIT @Limit OFFSET @Offset";
+
+            string countQuery = "SELECT COUNT(*) FROM WORKORDER";
 
             using (var connection = _context.CreateConnection())
             {
-                var reuslt = await connection.QueryAsync<ResultWorkOrderDto>(query);
-                return reuslt.ToList();
+                var result = await connection.QueryAsync<ResultWorkOrderDto>(query, new { Offset = offset, Limit = limit });
+                var total = await connection.ExecuteScalarAsync<int>(countQuery);
+                return (result.ToList(), total);
             }
         }
 
         public async Task<List<ResultWorkOrderImagesDto>> GetWorkOrderById(int workOrderId)
         {
-            string query = "SELECT A.WORKORDERID, A.ASSIGNID, A.PERSONELID, B.*  FROM WORKORDER A LEFT JOIN WORKORDERIMG B ON A.WORKORDERID = B.WORKORDERID WHERE A.WORKORDERID = @WORKORDERID";
+            string query = "SELECT * FROM WORKORDERIMG WHERE WORKORDERID = @WORKORDERID";
 
             var parameters = new DynamicParameters();
             parameters.Add("@WORKORDERID", workOrderId);
@@ -117,39 +130,52 @@ namespace cleanFlow.Repositories.WorkOrderRepository
             }
         }
 
-        public async Task<Byte[]> ConvertToByteArray(IFormFile file)
+        public byte[] ConvertBase64ToBytes(string base64String)
         {
-            if (file == null || file.Length == 0)
-            {
-                return null;
-            }
+            return string.IsNullOrEmpty(base64String) ? null : Convert.FromBase64String(base64String);
+        }
 
-            using (var memoryStream = new MemoryStream())
+        private void AddParameterIfNotNull(DynamicParameters parameters, List<string> setClauses, string fieldName, string base64Value)
+        {
+            if (!string.IsNullOrWhiteSpace(base64Value))
             {
-                await file.CopyToAsync(memoryStream);
-                return memoryStream.ToArray();
+                setClauses.Add($"{fieldName} = @{fieldName}");
+                parameters.Add($"@{fieldName}", ConvertBase64ToBytes(base64Value));
             }
         }
 
         public async Task UpdateWorkOrder(int workOrderId, UpdateWorkOrderDto updateWorkOrderDto)
         {
-            string query = "UPDATE WORKORDER SET ASSIGNID = @ASSIGNID, SHIFTID = @SHIFTID, PERSONELID = @PERSONELID, LAVABO_PHOTO = @LAVABO_PHOTO, PISUAR_PHOTO = @PISUAR_PHOTO, KLOZET_PHOTO = @KLOZET_PHOTO, TEZGAH_PHOTO = @TEZGAH_PHOTO, SABUNLUK_PHOTO = @SABUNLUK_PHOTO, KABIN_PHOTO = @KABIN_PHOTO, AYNA_PHOTO = @AYNA_PHOTO, COP_PHOTO = @COP_PHOTO, TUVALET_KAGIDI_PHOTO = @TUVALET_KAGIDI_PHOTO, HAVLU_MAKINESI_PHOTO = @HAVLU_MAKINESI_PHOTO WHERE WORKORDERID = @WORKORDERID";
-
             var parameters = new DynamicParameters();
             parameters.Add("@WORKORDERID", workOrderId);
-            parameters.Add("@ASSIGNID", updateWorkOrderDto.ASSIGNID);
-            parameters.Add("@SHIFTID", updateWorkOrderDto.SHIFTID);
-            parameters.Add("@PERSONELID", updateWorkOrderDto.PERSONELID);
-            parameters.Add("@LAVABO_PHOTO", updateWorkOrderDto.LAVABO_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.LAVABO_PHOTO) : null);
-            parameters.Add("@PISUAR_PHOTO", updateWorkOrderDto.PISUAR_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.PISUAR_PHOTO) : null);
-            parameters.Add("@KLOZET_PHOTO", updateWorkOrderDto.KLOZET_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.KLOZET_PHOTO) : null);
-            parameters.Add("@TEZGAH_PHOTO", updateWorkOrderDto.TEZGAH_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.TEZGAH_PHOTO) : null);
-            parameters.Add("@SABUNLUK_PHOTO", updateWorkOrderDto.SABUNLUK_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.SABUNLUK_PHOTO) : null);
-            parameters.Add("@KABIN_PHOTO", updateWorkOrderDto.KABIN_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.KABIN_PHOTO) : null);
-            parameters.Add("@AYNA_PHOTO", updateWorkOrderDto.AYNA_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.AYNA_PHOTO) : null);
-            parameters.Add("@COP_PHOTO", updateWorkOrderDto.COP_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.COP_PHOTO) : null);
-            parameters.Add("@TUVALET_KAGIDI_PHOTO", updateWorkOrderDto.TUVALET_KAGIDI_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.TUVALET_KAGIDI_PHOTO) : null);
-            parameters.Add("@HAVLU_MAKINESI_PHOTO", updateWorkOrderDto.HAVLU_MAKINESI_PHOTO != null ? await ConvertToByteArray(updateWorkOrderDto.HAVLU_MAKINESI_PHOTO) : null);
+
+            var setClauses = new List<string>();
+
+            var photos = new Dictionary<string, string>
+            {
+                { "LAVABO_PHOTO", updateWorkOrderDto.LAVABO_PHOTO },
+                { "PISUAR_PHOTO", updateWorkOrderDto.PISUAR_PHOTO },
+                { "KLOZET_PHOTO", updateWorkOrderDto.KLOZET_PHOTO },
+                { "TEZGAH_PHOTO", updateWorkOrderDto.TEZGAH_PHOTO },
+                { "SABUNLUK_PHOTO", updateWorkOrderDto.SABUNLUK_PHOTO },
+                { "KABIN_PHOTO", updateWorkOrderDto.KABIN_PHOTO },
+                { "AYNA_PHOTO", updateWorkOrderDto.AYNA_PHOTO },
+                { "COP_PHOTO", updateWorkOrderDto.COP_PHOTO },
+                { "TUVALET_KAGIDI_PHOTO", updateWorkOrderDto.TUVALET_KAGIDI_PHOTO },
+                { "HAVLU_MAKINESI_PHOTO", updateWorkOrderDto.HAVLU_MAKINESI_PHOTO }
+            };
+
+            foreach (var photo in photos)
+            {
+                AddParameterIfNotNull(parameters, setClauses, photo.Key, photo.Value);
+            }
+
+            if (!setClauses.Any())
+            {
+                throw new InvalidOperationException("Güncellenecek veri yok!");
+            }
+
+            string query = $"UPDATE WORKORDERIMG SET {string.Join(", ", setClauses)} WHERE WORKORDERID = @WORKORDERID";
 
             using (var connection = _context.CreateConnection())
             {
@@ -165,7 +191,7 @@ namespace cleanFlow.Repositories.WorkOrderRepository
             var createWorkorderParameters = new DynamicParameters();
             createWorkorderParameters.Add("@ASSIGNID", createWorkOrderDto.ASSIGNID);
             createWorkorderParameters.Add("@SHIFTID", createWorkOrderDto.SHIFTID);
-            createWorkorderParameters.Add("@PERSONELID", createWorkOrderDto.PERSONELID); 
+            createWorkorderParameters.Add("@PERSONELID", createWorkOrderDto.PERSONELID);
             int workOrderId;
 
             using (var connection = _context.CreateConnection())
@@ -177,16 +203,16 @@ namespace cleanFlow.Repositories.WorkOrderRepository
 
             var parameters = new DynamicParameters();
             parameters.Add("@WORKORDERID", workOrderId);
-            parameters.Add("@LAVABO_PHOTO", createWorkOrderDto.LAVABO_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.LAVABO_PHOTO) : null);
-            parameters.Add("@PISUAR_PHOTO", createWorkOrderDto.PISUAR_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.PISUAR_PHOTO) : null);
-            parameters.Add("@KLOZET_PHOTO", createWorkOrderDto.KLOZET_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.KLOZET_PHOTO) : null);
-            parameters.Add("@TEZGAH_PHOTO", createWorkOrderDto.TEZGAH_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.TEZGAH_PHOTO) : null);
-            parameters.Add("@SABUNLUK_PHOTO", createWorkOrderDto.SABUNLUK_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.SABUNLUK_PHOTO) : null);
-            parameters.Add("@KABIN_PHOTO", createWorkOrderDto.KABIN_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.KABIN_PHOTO) : null);
-            parameters.Add("@AYNA_PHOTO", createWorkOrderDto.AYNA_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.AYNA_PHOTO) : null);
-            parameters.Add("@COP_PHOTO", createWorkOrderDto.COP_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.COP_PHOTO) : null);
-            parameters.Add("@TUVALET_KAGIDI_PHOTO", createWorkOrderDto.TUVALET_KAGIDI_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.TUVALET_KAGIDI_PHOTO) : null);
-            parameters.Add("@HAVLU_MAKINESI_PHOTO", createWorkOrderDto.HAVLU_MAKINESI_PHOTO != null ? await ConvertToByteArray(createWorkOrderDto.HAVLU_MAKINESI_PHOTO) : null);
+            parameters.Add("@LAVABO_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.LAVABO_PHOTO));
+            parameters.Add("@PISUAR_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.PISUAR_PHOTO));
+            parameters.Add("@KLOZET_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.KLOZET_PHOTO));
+            parameters.Add("@TEZGAH_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.TEZGAH_PHOTO));
+            parameters.Add("@SABUNLUK_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.SABUNLUK_PHOTO));
+            parameters.Add("@KABIN_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.KABIN_PHOTO));
+            parameters.Add("@AYNA_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.AYNA_PHOTO));
+            parameters.Add("@COP_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.COP_PHOTO));
+            parameters.Add("@TUVALET_KAGIDI_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.TUVALET_KAGIDI_PHOTO));
+            parameters.Add("@HAVLU_MAKINESI_PHOTO", ConvertBase64ToBytes(createWorkOrderDto.HAVLU_MAKINESI_PHOTO));
 
             using (var connection = _context.CreateConnection())
             {
@@ -232,6 +258,45 @@ namespace cleanFlow.Repositories.WorkOrderRepository
                 }
 
                 return resultList;
+            }
+        }
+
+        public async Task<List<ResultWorkOrderDto>> SearchWorkOrder(string search)
+        {
+            string query = @$"SELECT 
+                            A.WORKORDERID, 
+                            D.SECTION, 
+                            D.MAHALCODE, 
+                            D.WCTYPE,
+                            E.LOCATIONNAME,
+                            B.NAME,
+                            B.SURNAME,
+                            B.PHONENUMBER,
+                            B.USERNAME,
+                            B.AGE
+                            FROM WORKORDER A 
+                            LEFT JOIN PERSONELS B ON A.PERSONELID = B.PERSONELID 
+                            LEFT JOIN ASSIGN C ON A.ASSIGNID = C.ASSIGNID 
+                            LEFT JOIN WC D ON C.WCID = D.WCID 
+                            LEFT JOIN LOCATIONS E ON D.LOCATIONID = E.LOCATIONID 
+                            LEFT JOIN SHIFT F ON A.SHIFTID = F.SHIFTID
+                            WHERE 
+                            A.WORKORDERID LIKE @Search
+                            OR D.SECTION LIKE @Search 
+                            OR D.MAHALCODE LIKE @Search
+                            OR D.WCTYPE LIKE @Search
+                            OR E.LOCATIONNAME LIKE @Search
+                            OR B.NAME LIKE @Search
+                            OR B.SURNAME LIKE @Search
+                            OR B.PHONENUMBER LIKE @Search
+                            OR B.USERNAME LIKE @Search
+                            OR B.AGE LIKE @Search
+                            ORDER BY A.CREATED_AT DESC";
+
+            using (var connection = _context.CreateConnection())
+            {
+                var result = await connection.QueryAsync<ResultWorkOrderDto>(query, new { Search = $"%{search}%" });
+                return result.ToList();
             }
         }
     }

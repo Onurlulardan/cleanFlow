@@ -15,12 +15,12 @@ namespace cleanFlow.Controllers
             _workOrderRepository = workOrderRepository;
         }
 
-        [HttpGet("assign/{assignId}")]
-        public async Task<IActionResult> GetWorkOrdersByAssignId(int assignId)
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchWorkOrder([FromQuery] string search)
         {
             try
             {
-                var result = await _workOrderRepository.GetWorkOrdersByAssignId(assignId);
+                var result = await _workOrderRepository.SearchWorkOrder(search);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -29,12 +29,35 @@ namespace cleanFlow.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllWorkOrders()
+        [HttpGet("assign/{assignId}")]
+        public async Task<IActionResult> GetWorkOrdersByAssignId(int assignId)
         {
             try
             {
-                var result = await _workOrderRepository.GetAllWorkOrders();
+                var result = await _workOrderRepository.GetWorkOrdersByAssignId(assignId);
+                return Ok(result);  
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllWorkOrders([FromQuery] int page = 0, int limit = 10)
+        {
+            try
+            {
+                var (Data, Total) = await _workOrderRepository.GetAllWorkOrders(page, limit);
+                var result = new
+                {
+                    Data = Data,
+                    Total = Total,
+                    Page = page,
+                    Limit = limit
+                };
+
                 return Ok(result);
             }
             catch (Exception ex)
@@ -72,7 +95,7 @@ namespace cleanFlow.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateWorkOrder([FromForm] CreateWorkOrderDto createWorkOrderDto)
+        public async Task<IActionResult> CreateWorkOrder(CreateWorkOrderDto createWorkOrderDto)
         {
             try
             {
@@ -86,7 +109,7 @@ namespace cleanFlow.Controllers
         }
 
         [HttpPut("{workOrderId}")]
-        public async Task<IActionResult> UpdateWorkOrder(int workOrderId, [FromBody] UpdateWorkOrderDto updateWorkOrderDto)
+        public async Task<IActionResult> UpdateWorkOrder(int workOrderId,UpdateWorkOrderDto updateWorkOrderDto)
         {
             try
             {
