@@ -13,8 +13,11 @@ using cleanFlow.Repositories.RoleRepository;
 using cleanFlow.Repositories.AssignRepository;
 using cleanFlow.Repositories.AuditRepository;
 using cleanFlow.Repositories.WorkOrderRepository;
+using dotenv.net;
 
 var builder = WebApplication.CreateBuilder(args);
+
+DotEnv.Load();
 
 // JWT kimlik doðrulamasýný yapýlandýrma
 var jwtSection = builder.Configuration.GetSection("Jwt").Get<JwtSettings>();
