@@ -1,2 +1,4 @@
-Api dökümantasyonu : https://cleanflowbe.altuntasonur.com/swagger/index.html
-Web interface : https://cleanflow.altuntasonur.com/ -username: admin password: admin
+- Api dökümantasyonu : https://cleanflowbe.altuntasonur.com/swagger/index.html
+- Web interface : https://cleanflow.altuntasonur.com/ -username: admin password: admin
+- Authorize'ı devre dışı bıraktım incelerken kolaylık olsun diye controller başına [Authorize] eklerseniz etkinleşecektir
+- projede dapper kullandım appsettins içindeki ConnectionStrings alanını kendi veritabanı bilginiz ile doldurmanız gerekir ve veri tabanı tabloları için şeması için mesaj atın paylaşırım
