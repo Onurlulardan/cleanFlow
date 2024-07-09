@@ -11,7 +11,7 @@ CleanFlow, .NET Core kullanılarak geliştirilmiş, temizlik operasyonlarını o
 - **Detaylı Raporlar:** Temizlik istatistikleri, personel performansı ve lokasyona göre detaylı raporlar sunulur.
 
 ## Kullanım
-- **API Dokümantasyonu:** [API dökümantasyonuna buradan ulaşın](https://cleanflowbe.altuntasonur.com/swagger/index.html).
+- **API Dokümantasyonu:** [API dökümantasyonuna buradan ulaşın](https://dockertest-cleanflow.mhkb1d.easypanel.host/swagger/index.html).
 - **Web Arayüzü:** [Web arayüzüne buradan erişin](https://cleanflow.altuntasonur.com/) (Kullanıcı adı: admin, şifre: admin).
 - **Dapper Entegrasyonu:** `appsettings.json` dosyasındaki `ConnectionStrings` alanını kendi veritabanı bilgileriniz ile doldurun.
 
